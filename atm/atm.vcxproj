@@ -162,6 +162,9 @@
     <ClInclude Include="MySQLDB.h" />
     <ClInclude Include="Transaction.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\..\Documents\atm.mwb" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

@@ -6,6 +6,8 @@
 #include <mysql.h>
 #include <string>
 #include "MySQLDB.h"
+
+void displayOperations();
 int main()
 {
 	MYSQL* connection;
@@ -24,34 +26,28 @@ int main()
 	
 	std::getline(std::cin, creditCard);
 
-	// make sure it exists
+	// checking credit card number
 
 	connection = connect(host, username, password, dbName, port);
+	std::string query = "SELECT * FROM atm.credit_card WHERE card_number=";
+	query += creditCard;
 
-	//display operations
+	int state = mysql_query(connection, query.c_str());
+
+	res = mysql_store_result(connection);
+	row = mysql_fetch_row(res);
+
+	// checking credit card pincode
+
+	std::cout << "Please Enter Your PIN Code \n\n";
+	std::string pin;
+	std::getline(std::cin, pin);
+
+	std::cout << row[1];
 
 	displayOperations();
 
-
-
-
-
-
-	if (connection) {
-		std::cout << "yes";
-		/*std::cout << "yes";
-		int state = mysql_query(connection, q);
-
-		res = mysql_store_result(connection);
-
-		while (row = mysql_fetch_row(res)) {
-			std::cout << row[0] << " " << row[1];
-		}*/
-	}
-
-
 	std::cin.get();
-
 }
 
 
