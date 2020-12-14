@@ -6,10 +6,24 @@
 #include <mysql.h>
 #include <string>
 #include "MySQLDB.h"
+#include "ui.h"
+#include "Transaction.h"
+
+static int newCounter = 0;
 
 void displayOperations();
-int main()
+void displayCurrency();
+
+void * operator new(size_t size)
 {
+	std::cout << "New operator overloading \n\n";
+	void * p = malloc(size);
+	newCounter++;
+	return p;
+}
+
+int main() {
+
 	MYSQL* connection;
 	MYSQL_RES *res;
 	MYSQL_ROW row;
@@ -20,34 +34,101 @@ int main()
 	const char* dbName = "atm";
 	unsigned int port = 3306;
 
-    std::cout << "Please Enter Your Credit Card Number \n\n";
+	connection = connect(host, username, password, dbName, port);
 
+
+    std::cout << "Please Enter Your Credit Card Number \n\n";
 	std::string creditCard;
-	
 	std::getline(std::cin, creditCard);
 
-	// checking credit card number
+	// validate credit card info
+	int bankAccount = validateCreditCard(connection, res, row, creditCard);
+	if(bankAccount) {
+		std::cout << "valid info\n\n";
+	}
+	else {
+		std::cout << "invalid info\n\n";
+		return 0;
+	}
 
-	connection = connect(host, username, password, dbName, port);
-	std::string query = "SELECT * FROM atm.credit_card WHERE card_number=";
-	query += creditCard;
+	mysql_free_result(res);
 
-	int state = mysql_query(connection, query.c_str());
 
-	res = mysql_store_result(connection);
-	row = mysql_fetch_row(res);
+	int op;
 
-	// checking credit card pincode
+	// atm actions
+	do {
 
-	std::cout << "Please Enter Your PIN Code \n\n";
-	std::string pin;
-	std::getline(std::cin, pin);
+		displayOperations();
+		std::cin >> op;
 
-	std::cout << row[1];
+	} while (false);
 
-	displayOperations();
+	Transaction* transaction;
+	bool isTran = false;
+
+	if (op == 1) { // deposit
+		transaction = TransactionFactory::createTransaction(TransactionType::DEPOSIT);		
+		isTran = true;
+
+		transaction->setFrom(bankAccount);
+		transaction->setTo(bankAccount);
+
+		std::cout << "Please Select The Currency You Wish To Deposit\n\n";
+		displayCurrency();
+
+		int amountType;
+		std::cin >> amountType;
+		std::cout << amountType;
+		transaction->setAmountType(amountType);
+
+		std::cout << "Please Type The Amount to Deposit\n\n";
+
+		float amount;
+		std::cin >> amount;
+		std::cout << amount;
+
+		transaction->setAmount(amount);
+		transaction->commit(connection);
+		
+
+		std::cout << "Deposit Complete\n\n";
+	}
+	else if(op == 2){ // withdraw
+		transaction = TransactionFactory::createTransaction(TransactionType::WITHDRAW);
+		isTran = true;
+
+		transaction->setFrom(bankAccount);
+
+		std::cout << "Please Select The Currency You Wish To Withdraw\n\n";
+		displayCurrency();
+
+		int amountType;
+		std::cin >> amountType;
+		std::cout << amountType;
+		transaction->setAmountType(amountType);
+
+		std::cout << "Please Type The Amount to Withdraw\n\n";
+
+		float amount;
+		std::cin >> amount;
+		std::cout << amount;
+
+		transaction->setAmount(amount);
+		transaction->commit(connection);
+	}
+	else if(op == 3) { // transfer
+		transaction = TransactionFactory::createTransaction(TransactionType::TRANSFER);
+		isTran = true;
+
+		std::cout << "Transaction Complete...\n\n";
+
+	}
 
 	std::cin.get();
+
+	std::cout << "Total New Allocations: " << newCounter;
+	return 0;
 }
 
 
@@ -57,7 +138,15 @@ void displayOperations() {
 	std::cout << "1. Deposit To Your Account.\n";
 	std::cout << "2. Withdraw From Your Account.\n";
 	std::cout << "3. Transfer To Another Account.\n";
-	std::cout << "4. Exit System.\n\n";
+	std::cout << "4. View Transactions.\n";
+	std::cout << "5. Exit System.\n\n";
+}
+
+void displayCurrency()
+{
+	std::cout << "1. ILS\n";
+	std::cout << "2. USD\n";
+	std::cout << "3. JOR\n";
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

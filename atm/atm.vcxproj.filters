@@ -19,6 +19,9 @@
     <Filter Include="Source Files\bank_transactions">
       <UniqueIdentifier>{26e95187-ec22-437f-a901-d89bebedbde5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{f92ccaf4-7065-45c2-b74b-0e50bdff9c4b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="atm.cpp">
@@ -30,12 +33,24 @@
     <ClCompile Include="Transaction.cpp">
       <Filter>Source Files\bank_transactions</Filter>
     </ClCompile>
+    <ClCompile Include="ui.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="TransactionQueries.cpp">
+      <Filter>Source Files\database</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MySQLDB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Transaction.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TransactionQueries.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

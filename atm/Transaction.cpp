@@ -1,12 +1,23 @@
-#include "Transaction.h"
 #include <iostream>
-
+#include <string>
 #include <time.h> 
-
+#include "TransactionQueries.h"
+#include "Transaction.h"
 Transaction::Transaction()
 {
 
 }
+
+int Transaction::getTranType()
+{
+	return type;
+}
+
+void Transaction::setTranType(int Ttype)
+{
+	type = Ttype;
+}
+
 
 int Transaction::getAmountType()
 {
@@ -47,6 +58,7 @@ void Transaction::setTo(int to)
 {
 	this->to = to;
 }
+
 //
 //time_t Transaction::getCreatedTimestamp()
 //{
@@ -58,17 +70,50 @@ void Transaction::setTo(int to)
 
 // subclasses
 
-void Deposit::commit()
+
+void Deposit::commit(MYSQL*& connection)
 {
-	//commit changes
+	createTransaction(connection, this);
+	updateBalance(connection, this);
+
 }
 
-void Withdraw::commit()
+void Withdraw::commit(MYSQL*& connection)
 {
-	//commit changes
+	int state = updateBalance(connection, this);
+	if (!state) {
+		createTransaction(connection, this);
+		std::cout << "Withdraw Complete...\n\n";
+	}
+	else {
+		std::cout << "Error: Not Enough Balance, Exiting...\n\n";
+
+	}
 }
 
-void Transfer::commit()
+void Transfer::commit(MYSQL*& connection)
 {
-	//commit changes
+	std::cout << "transfer";
 }
+
+
+// transaction factory
+
+Transaction* TransactionFactory::createTransaction(TransactionType type)
+{
+	if (type == DEPOSIT) {
+		Deposit deposit;
+		deposit.setTranType(DEPOSIT);
+		return &deposit;
+	}
+	else if (type == WITHDRAW) {
+		Withdraw withdraw;
+		withdraw.setTranType(WITHDRAW);
+		return &withdraw;
+	}
+	else {
+		Transfer transfer;
+		transfer.setTranType(TRANSFER);
+		return &transfer;
+	}
+};

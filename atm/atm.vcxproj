@@ -143,6 +143,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Program Files\MySQL\Connector C++ 1.1\include;C:\Program Files\MySQL\MySQL Server 8.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -157,10 +158,14 @@
     <ClCompile Include="atm.cpp" />
     <ClCompile Include="MySQLDB.cpp" />
     <ClCompile Include="Transaction.cpp" />
+    <ClCompile Include="TransactionQueries.cpp" />
+    <ClCompile Include="ui.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MySQLDB.h" />
     <ClInclude Include="Transaction.h" />
+    <ClInclude Include="TransactionQueries.h" />
+    <ClInclude Include="ui.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\..\Documents\atm.mwb" />
