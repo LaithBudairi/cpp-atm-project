@@ -6,8 +6,9 @@
 #include <mysql.h>
 #include <string>
 #include "MySQLDB.h"
-#include "ui.h"
-#include "Transaction.h"
+#include "TransactionQueries.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 
 static int newCounter = 0;
 
@@ -16,13 +17,21 @@ void displayCurrency();
 
 void * operator new(size_t size)
 {
-	std::cout << "New operator overloading \n\n";
+	//std::cout << "New operator overloading \n\n";
 	void * p = malloc(size);
 	newCounter++;
 	return p;
 }
 
 int main() {
+
+	auto max_size = 1048576 * 5;
+	auto max_files = 3;
+	spdlog::flush_every(std::chrono::seconds(3));
+
+	spdlog::set_level(spdlog::level::debug);
+	auto logger =  spdlog::rotating_logger_mt("atm-logger", "C:\\logs\\atm\\logs.txt", max_size, max_files);
+
 
 	MYSQL* connection;
 	MYSQL_RES *res;
@@ -39,15 +48,16 @@ int main() {
 
     std::cout << "Please Enter Your Credit Card Number \n\n";
 	std::string creditCard;
+
 	std::getline(std::cin, creditCard);
 
 	// validate credit card info
 	int bankAccount = validateCreditCard(connection, res, row, creditCard);
 	if(bankAccount) {
-		std::cout << "valid info\n\n";
+		logger->info("Valid Credit Card Credentials...");
 	}
 	else {
-		std::cout << "invalid info\n\n";
+		std::cout << "Invalid Credit Card Credentials. Exiting...";
 		return 0;
 	}
 
@@ -65,11 +75,10 @@ int main() {
 	} while (false);
 
 	Transaction* transaction;
-	bool isTran = false;
 
 	if (op == 1) { // deposit
+		logger->info("Deposit Operation");
 		transaction = TransactionFactory::createTransaction(TransactionType::DEPOSIT);		
-		isTran = true;
 
 		transaction->setFrom(bankAccount);
 		transaction->setTo(bankAccount);
@@ -79,24 +88,21 @@ int main() {
 
 		int amountType;
 		std::cin >> amountType;
-		std::cout << amountType;
 		transaction->setAmountType(amountType);
 
 		std::cout << "Please Type The Amount to Deposit\n\n";
 
 		float amount;
 		std::cin >> amount;
-		std::cout << amount;
 
 		transaction->setAmount(amount);
 		transaction->commit(connection);
-		
 
 		std::cout << "Deposit Complete\n\n";
 	}
 	else if(op == 2){ // withdraw
+		logger->info("Withdraw Operation");
 		transaction = TransactionFactory::createTransaction(TransactionType::WITHDRAW);
-		isTran = true;
 
 		transaction->setFrom(bankAccount);
 
@@ -105,21 +111,46 @@ int main() {
 
 		int amountType;
 		std::cin >> amountType;
-		std::cout << amountType;
 		transaction->setAmountType(amountType);
 
-		std::cout << "Please Type The Amount to Withdraw\n\n";
+		std::cout << "Please Type The Amount To Withdraw\n\n";
 
 		float amount;
 		std::cin >> amount;
-		std::cout << amount;
 
 		transaction->setAmount(amount);
 		transaction->commit(connection);
 	}
 	else if(op == 3) { // transfer
+		logger->info("Transfer Operation");
 		transaction = TransactionFactory::createTransaction(TransactionType::TRANSFER);
-		isTran = true;
+
+		transaction->setFrom(bankAccount);
+
+		std::cout << "Please Type The Account Number You Wish To Transfer To\n\n";
+
+		int to;
+		std::cin >> to;
+
+		transaction->setTo(to);
+
+
+		std::cout << "Please Select The Currency You Wish To Transfer\n\n";
+		displayCurrency();
+
+		int amountType;
+		std::cin >> amountType;
+		transaction->setAmountType(amountType);
+
+		std::cout << "Please Type The Amount To Transfer\n\n";
+
+		float amount;
+		std::cin >> amount;
+
+		transaction->setAmount(amount);
+
+		transaction->commit(connection);
+
 
 		std::cout << "Transaction Complete...\n\n";
 
@@ -128,6 +159,7 @@ int main() {
 	std::cin.get();
 
 	std::cout << "Total New Allocations: " << newCounter;
+	logger->info("Exiting Application");
 	return 0;
 }
 
@@ -148,14 +180,3 @@ void displayCurrency()
 	std::cout << "2. USD\n";
 	std::cout << "3. JOR\n";
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file

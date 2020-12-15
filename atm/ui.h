@@ -5,5 +5,4 @@
 #include <mysql.h>
 #include <string>
 
-int validateCreditCard(MYSQL*&, MYSQL_RES*&, MYSQL_ROW&, std::string&);
 #endif

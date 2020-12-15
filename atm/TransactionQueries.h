@@ -5,5 +5,8 @@
 
 void createTransaction(MYSQL*&, Transaction*);
 int updateBalance(MYSQL*&, Transaction*);
+int tranferTo(MYSQL*&, Transaction*);
+int findAccountHolderWithId(MYSQL*&, MYSQL_RES*&, MYSQL_ROW& ,int&);
+int validateCreditCard(MYSQL*&, MYSQL_RES*&, MYSQL_ROW&, std::string&);
 
 #endif

@@ -1,8 +1,11 @@
 #include <iostream>
 #include <string>
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 #include <time.h> 
 #include "TransactionQueries.h"
 #include "Transaction.h"
+
 Transaction::Transaction()
 {
 
@@ -73,27 +76,59 @@ void Transaction::setTo(int to)
 
 void Deposit::commit(MYSQL*& connection)
 {
+	auto logger = spdlog::get("atm-logger");
+
+	int state = updateBalance(connection, this);
+	logger->info("Deposit Successful");
+
 	createTransaction(connection, this);
-	updateBalance(connection, this);
+	logger->info("Transaction Created");
 
 }
 
 void Withdraw::commit(MYSQL*& connection)
 {
+	auto logger = spdlog::get("atm-logger");
 	int state = updateBalance(connection, this);
 	if (!state) {
 		createTransaction(connection, this);
-		std::cout << "Withdraw Complete...\n\n";
+		logger->info("Withdraw Successful");
+
 	}
 	else {
 		std::cout << "Error: Not Enough Balance, Exiting...\n\n";
+		logger->info("Withdraw Unsuccessful");
 
 	}
 }
 
 void Transfer::commit(MYSQL*& connection)
 {
-	std::cout << "transfer";
+	MYSQL_RES* res;
+	MYSQL_ROW row;
+
+	int id = findAccountHolderWithId(connection, res, row, to);
+	auto logger = spdlog::get("atm-logger");
+
+	if (!id) {
+		std::cout << "Account Number Was Not Found...\n";
+		logger->info("Transfer Unsuccessful. Invalid Account Number");
+	}
+	else {
+		int state = updateBalance(connection, this);
+
+		if (!state) {
+			createTransaction(connection, this);
+			tranferTo(connection, this);
+			std::cout << "Transfer Complete...\n\n";
+			logger->info("Transfer Successful");
+
+		}
+		else {
+			logger->info("Transfer Unsuccessful. Not Enough Balance");
+			std::cout << "Error: Not Enough Balance, Exiting...\n\n";
+		}
+	}
 }
 
 
