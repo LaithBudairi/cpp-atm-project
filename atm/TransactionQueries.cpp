@@ -39,7 +39,7 @@ int tranferTo(MYSQL*& connection, Transaction* t) {
 
 	query << "UPDATE `atm`.`account_holder_has_account_type` SET `balance` =" <<
 		"balance " << '+' << t->getAmount() << " WHERE (`account_type_id` =" << t->getAmountType() <<
-		") and (`account_holder_id` = '" << t->getTo() << "')";
+		") AND (`account_holder_id` = '" << t->getTo() << "')";
 
 	return mysql_query(connection, query.str().c_str());
 }
@@ -49,7 +49,7 @@ int findAccountHolderWithId(MYSQL*& connection, MYSQL_RES*& res, MYSQL_ROW& row,
 {
 	std::stringstream query;
 
-	query << "SELECT id FROM atm.account_holder where id =" << id;
+	query << "SELECT id FROM atm.account_holder WHERE id =" << id;
 	int state = mysql_query(connection, query.str().c_str());
 
 	res = mysql_store_result(connection);
@@ -63,7 +63,7 @@ int findAccountHolderWithId(MYSQL*& connection, MYSQL_RES*& res, MYSQL_ROW& row,
 
 int validateCreditCard(MYSQL*& connection, MYSQL_RES*& res, MYSQL_ROW& row, std::string& creditCard)
 {
-	std::string query = "select * from atm.credit_card where card_number='";
+	std::string query = "SELECT * FROM atm.credit_card WHERE card_number='";
 	query += creditCard;
 	query += "'";
 
@@ -88,3 +88,49 @@ int validateCreditCard(MYSQL*& connection, MYSQL_RES*& res, MYSQL_ROW& row, std:
 		return std::stoi(row[2]);
 	}
 }
+
+void findAllDeposits(MYSQL*& connection, MYSQL_RES*& res, int bankAccount)
+{
+	std::stringstream query;
+
+	query << "SELECT amount, account_type_id, created FROM atm.transaction where `from`= " << bankAccount
+		  << " and `from`= " << bankAccount;
+
+	mysql_query(connection, query.str().c_str());
+	res = mysql_store_result(connection);
+
+}
+
+void findAllWithdraws(MYSQL *& connection, MYSQL_RES *& res, int bankAccount)
+{
+	std::stringstream query;
+
+	query << "SELECT amount, account_type_id, created FROM atm.transaction where `from`= " << bankAccount
+		<< " and `type`= 1";
+
+	mysql_query(connection, query.str().c_str());
+	res = mysql_store_result(connection);
+}
+
+void findAllTransfers(MYSQL*& connection, MYSQL_RES*& res, int bankAccount)
+{
+	std::stringstream query;
+
+	query << "SELECT `to`, amount, account_type_id, created FROM atm.transaction Where `from` = " 
+		  << bankAccount << " AND `type` = 2";
+
+	mysql_query(connection, query.str().c_str());
+	res = mysql_store_result(connection);
+}
+
+void findAllTransactions(MYSQL *& connection, MYSQL_RES *& res, int bankAccount)
+{
+	std::stringstream query;
+
+	query << "SELECT `to`, amount, account_type_id, created FROM atm.transaction Where `from` = "
+		  << bankAccount;
+
+	mysql_query(connection, query.str().c_str());
+	res = mysql_store_result(connection);
+}
+

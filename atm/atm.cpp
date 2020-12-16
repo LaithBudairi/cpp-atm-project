@@ -5,10 +5,12 @@
 
 #include <mysql.h>
 #include <string>
+
 #include "MySQLDB.h"
 #include "TransactionQueries.h"
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/rotating_file_sink.h"
+#include "ui.h"
 
 static int newCounter = 0;
 
@@ -28,10 +30,9 @@ int main() {
 	auto max_size = 1048576 * 5;
 	auto max_files = 3;
 	spdlog::flush_every(std::chrono::seconds(3));
-
 	spdlog::set_level(spdlog::level::debug);
-	auto logger =  spdlog::rotating_logger_mt("atm-logger", "C:\\logs\\atm\\logs.txt", max_size, max_files);
 
+	auto logger =  spdlog::rotating_logger_mt("atm-logger", "C:\\logs\\atm\\logs.txt", max_size, max_files);
 
 	MYSQL* connection;
 	MYSQL_RES *res;
@@ -155,28 +156,38 @@ int main() {
 		std::cout << "Transaction Complete...\n\n";
 
 	}
+	else if(op == 4) { //transaction
+		int tranOption;
+
+		displayTransactions();
+
+		std::cin >> tranOption;
+
+		if (tranOption == 1) {
+			displayAllDeposits(connection, res, row, bankAccount);
+			logger->info("View Deposits");
+
+		}
+		else if (tranOption == 2) {
+			displayAllWithdraws(connection, res, row, bankAccount);
+			logger->info("View Withdraws");
+		}
+		else if (tranOption == 3) {
+			displayAllTransfers(connection, res, row, bankAccount);
+			logger->info("View Transfers");
+		}
+		else if (tranOption = 4) {
+			displayAllTransactions(connection, res, row, bankAccount);
+			logger->info("View Transactions");
+		}
+
+	}
 
 	std::cin.get();
 
-	std::cout << "Total New Allocations: " << newCounter;
+	std::cout << "\nTotal New Allocations: " << newCounter;
 	logger->info("Exiting Application");
+	mysql_close(connection);
+
 	return 0;
-}
-
-
-void displayOperations() {
-	std::cout << "Please select an operation: \n\n";
-
-	std::cout << "1. Deposit To Your Account.\n";
-	std::cout << "2. Withdraw From Your Account.\n";
-	std::cout << "3. Transfer To Another Account.\n";
-	std::cout << "4. View Transactions.\n";
-	std::cout << "5. Exit System.\n\n";
-}
-
-void displayCurrency()
-{
-	std::cout << "1. ILS\n";
-	std::cout << "2. USD\n";
-	std::cout << "3. JOR\n";
 }

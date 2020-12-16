@@ -2,7 +2,6 @@
 #include <string>
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/rotating_file_sink.h"
-#include <time.h> 
 #include "TransactionQueries.h"
 #include "Transaction.h"
 
@@ -61,15 +60,6 @@ void Transaction::setTo(int to)
 {
 	this->to = to;
 }
-
-//
-//time_t Transaction::getCreatedTimestamp()
-//{
-//	time_t my_time = time(NULL);
-//
-//	return ctime(&my_time);
-//}
-
 
 // subclasses
 
