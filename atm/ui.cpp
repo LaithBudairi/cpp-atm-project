@@ -35,9 +35,9 @@ void displayAllDeposits(MYSQL*& connection, MYSQL_RES*& res, MYSQL_ROW& row, int
 		return;
 	}
 
-	std::cout << std::setfill('-') << std::setw(48) << "\n";
-	std::cout << "|        Amount        |         Date         |\n";
-	std::cout << std::setfill('-') << std::setw(48) << "\n";
+	std::cout << std::setfill('-') << std::setw(47) << "\n";
+	std::cout << "|        Amount         |        Date        |\n";
+	std::cout << std::setfill('-') << std::setw(47) << "\n";
 
 	while (row = mysql_fetch_row(res)) {
 		printf("|");
@@ -55,9 +55,9 @@ void displayAllDeposits(MYSQL*& connection, MYSQL_RES*& res, MYSQL_ROW& row, int
 		}
 
 
-		printf("%s %-6s            |", row[0], currencyOut);
-		printf("%s   |\n", row[2]);
-		std::cout << std::setfill('-') << std::setw(48) << "\n";
+		printf(" %-18s %s|", row[0], currencyOut);
+		printf(" %s| \n", row[2]);
+		std::cout << std::setfill('-') << std::setw(47) << "\n";
 	}
 }
 
@@ -74,7 +74,7 @@ void displayAllWithdraws(MYSQL *& connection, MYSQL_RES*& res, MYSQL_ROW & row, 
 	//std::cout << std::setfill('-') << std::setw(90) << "\n";
 
 	std::cout << std::setfill('-') << std::setw(48) << "\n";
-	std::cout << "|        Amount        |         Date         |\n";
+	std::cout << "|        Amount         |         Date        |\n";
 	std::cout << std::setfill('-') << std::setw(48) << "\n";
 
 	while (row = mysql_fetch_row(res)) {
@@ -92,8 +92,8 @@ void displayAllWithdraws(MYSQL *& connection, MYSQL_RES*& res, MYSQL_ROW & row, 
 			currencyOut = "JOR";
 		}
 
-		printf("%s %-6s            |", row[0], currencyOut);
-		printf("%s   |\n", row[2]);
+		printf(" %-18s %s|", row[0], currencyOut);
+		printf(" %s |\n", row[2]);
 		std::cout << std::setfill('-') << std::setw(48) << "\n";
 	}
 }
@@ -106,9 +106,9 @@ void displayAllTransfers(MYSQL *& connection, MYSQL_RES *& res, MYSQL_ROW & row,
 		return;
 	}
 
-	std::cout << std::setfill('-') << std::setw(87) << "\n";
-	std::cout << "|        Transfered To        |         Amount         |            Created          |\n";
-	std::cout << std::setfill('-') << std::setw(87) << "\n";
+	std::cout << std::setfill('-') << std::setw(78) << "\n";
+	std::cout << "|        Transfered To        |         Amount         |      Created       |\n";
+	std::cout << std::setfill('-') << std::setw(78) << "\n";
 
 	while (row = mysql_fetch_row(res)) {
 		printf("|");
@@ -128,8 +128,8 @@ void displayAllTransfers(MYSQL *& connection, MYSQL_RES *& res, MYSQL_ROW & row,
 		
 		printf(" %-28s|", row[0]);
 		printf(" %-19s %s|", row[1], currencyOut);
-		printf(" %s         |\n", row[3]);
-		std::cout << std::setfill('-') << std::setw(87) << "\n";
+		printf(" %s|\n", row[3]);
+		std::cout << std::setfill('-') << std::setw(78) << "\n";
 	}
 }
 
@@ -137,15 +137,14 @@ void displayAllTransactions(MYSQL *& connection, MYSQL_RES *& res, MYSQL_ROW & r
 {
 	findAllTransactions(connection, res, bankAccount);
 
-	findAllTransfers(connection, res, bankAccount);
 	if (res->row_count == 0) {
 		std::cout << "\nNo Transaction Found.\n\n";
 		return;
 	}
 
-	std::cout << std::setfill('-') << std::setw(87) << "\n";
-	std::cout << "|        Transfered To        |         Amount         |            Created          |\n";
-	std::cout << std::setfill('-') << std::setw(87) << "\n";
+	std::cout << std::setfill('-') << std::setw(78) << "\n";
+	std::cout << "|        Transfered To        |         Amount         |       Created      |\n";
+	std::cout << std::setfill('-') << std::setw(78) << "\n";
 
 	while (row = mysql_fetch_row(res)) {
 		printf("|");
@@ -165,7 +164,7 @@ void displayAllTransactions(MYSQL *& connection, MYSQL_RES *& res, MYSQL_ROW & r
 
 		printf(" %-28s|", row[0]);
 		printf(" %-19s %s|", row[1], currencyOut);
-		printf(" %s         |\n", row[3]);
-		std::cout << std::setfill('-') << std::setw(87) << "\n";
+		printf(" %s|\n", row[3]);
+		std::cout << std::setfill('-') << std::setw(78) << "\n";
 	}
 }

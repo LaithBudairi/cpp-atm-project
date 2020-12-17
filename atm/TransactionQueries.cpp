@@ -87,6 +87,7 @@ int validateCreditCard(MYSQL*& connection, MYSQL_RES*& res, MYSQL_ROW& row, std:
 	else {
 		return std::stoi(row[2]);
 	}
+
 }
 
 void findAllDeposits(MYSQL*& connection, MYSQL_RES*& res, int bankAccount)

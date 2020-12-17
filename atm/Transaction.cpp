@@ -4,6 +4,7 @@
 #include "spdlog/sinks/rotating_file_sink.h"
 #include "TransactionQueries.h"
 #include "Transaction.h"
+#include <memory>
 
 Transaction::Transaction()
 {
@@ -83,10 +84,9 @@ void Withdraw::commit(MYSQL*& connection)
 	if (!state) {
 		createTransaction(connection, this);
 		logger->info("Withdraw Successful");
-
 	}
 	else {
-		std::cout << "Error: Not Enough Balance, Exiting...\n\n";
+		std::cout << "Error: Not Enough Balance.\n\n";
 		logger->info("Withdraw Unsuccessful");
 
 	}
@@ -116,7 +116,7 @@ void Transfer::commit(MYSQL*& connection)
 		}
 		else {
 			logger->info("Transfer Unsuccessful. Not Enough Balance");
-			std::cout << "Error: Not Enough Balance, Exiting...\n\n";
+			std::cout << "Error: Not Enough Balance.\n\n";
 		}
 	}
 }
@@ -124,21 +124,22 @@ void Transfer::commit(MYSQL*& connection)
 
 // transaction factory
 
-Transaction* TransactionFactory::createTransaction(TransactionType type)
+std::shared_ptr<Transaction> TransactionFactory::createTransaction(TransactionType type)
 {
 	if (type == DEPOSIT) {
-		Deposit deposit;
-		deposit.setTranType(DEPOSIT);
-		return &deposit;
+
+		std::shared_ptr<Deposit> deposit = std::make_shared<Deposit>();
+		deposit->setTranType(DEPOSIT);
+		return deposit;
 	}
 	else if (type == WITHDRAW) {
-		Withdraw withdraw;
-		withdraw.setTranType(WITHDRAW);
-		return &withdraw;
+		std::shared_ptr<Withdraw> withdraw = std::make_shared<Withdraw>();
+		withdraw->setTranType(WITHDRAW);
+		return withdraw;
 	}
 	else {
-		Transfer transfer;
-		transfer.setTranType(TRANSFER);
-		return &transfer;
+		std::shared_ptr<Transfer> transfer = std::make_shared<Transfer>();
+		transfer->setTranType(TRANSFER);
+		return transfer;
 	}
 };
