@@ -1,4 +1,4 @@
-#include <mysql.h>
+#include "MYSQLDB.h"
 
 MYSQL* connect(const char*& host, const char*& username, const char*& password, const char*& dbName, unsigned int& port) {
 

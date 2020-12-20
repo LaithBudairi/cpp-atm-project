@@ -48,7 +48,6 @@ int main() {
 
 	connection = connect(host, username, password, dbName, port);
 
-
     std::cout << "Please Enter Your Credit Card Number \n\n";
 	std::string creditCard;
 

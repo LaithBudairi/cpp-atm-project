@@ -95,7 +95,7 @@ void findAllDeposits(MYSQL*& connection, MYSQL_RES*& res, int bankAccount)
 	std::stringstream query;
 
 	query << "SELECT amount, account_type_id, created FROM atm.transaction where `from`= " << bankAccount
-		  << " and `from`= " << bankAccount;
+		<< " and `type`= 0";
 
 	mysql_query(connection, query.str().c_str());
 	res = mysql_store_result(connection);
