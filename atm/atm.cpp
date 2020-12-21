@@ -5,21 +5,18 @@
 
 #include <mysql.h>
 #include <string>
+#include <processthreadsapi.h>
+
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 
 #include "MySQLDB.h"
 #include "TransactionQueries.h"
-#include "spdlog/spdlog.h"
-#include "spdlog/sinks/rotating_file_sink.h"
 #include "ui.h"
 
 static int newCounter = 0;
 
-void displayOperations();
-void displayCurrency();
-
-void * operator new(size_t size)
-{
-	//std::cout << "New operator overloading \n\n";
+void * operator new(size_t size) {
 	void * p = malloc(size);
 	newCounter++;
 	return p;
@@ -31,10 +28,11 @@ int main() {
 
 	auto max_size = 1048576 * 5;
 	auto max_files = 3;
+	auto logger =  spdlog::rotating_logger_mt("atm-logger", "C:\\logs\\atm\\logs.txt", max_size, max_files);
 	spdlog::flush_every(std::chrono::seconds(3));
 	spdlog::set_level(spdlog::level::debug);
 
-	auto logger =  spdlog::rotating_logger_mt("atm-logger", "C:\\logs\\atm\\logs.txt", max_size, max_files);
+	logger->info("Starting Application With PID: " + std::to_string(GetCurrentProcessId()));
 
 	MYSQL* connection;
 	MYSQL_RES *res;
@@ -60,99 +58,29 @@ int main() {
 	}
 	else {
 		std::cout << "Invalid Credit Card Credentials. Exiting...\n";
+		logger->error("Invalid Credit Card Credentials...");
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		return 0;
 
 	}
-
 	mysql_free_result(res);
-
-
+	
 	int op;
-
 	// atm actions
 	do {
-
 		displayOperations();
 		std::cin >> op;
 
-		std::shared_ptr<Transaction> transaction;
+		std::unique_ptr<Transaction> transaction;
 
 		if (op == 1) { // deposit
-			logger->info("Deposit Operation");
-			transaction = TransactionFactory::createTransaction(TransactionType::DEPOSIT);		
-
-			transaction->setFrom(bankAccount);
-			transaction->setTo(bankAccount);
-
-			std::cout << "Please Select The Currency You Wish To Deposit\n\n";
-			displayCurrency();
-
-			int amountType;
-			std::cin >> amountType;
-			transaction->setAmountType(amountType);
-
-			std::cout << "Please Type The Amount to Deposit\n\n";
-
-			float amount;
-			std::cin >> amount;
-
-			transaction->setAmount(amount);
-			transaction->commit(connection);
-
-			std::cout << "Deposit Complete\n\n";
+			depositProcedure(connection, transaction, bankAccount);
 		}
 		else if(op == 2){ // withdraw
-			logger->info("Withdraw Operation");
-			transaction = TransactionFactory::createTransaction(TransactionType::WITHDRAW);
-
-			transaction->setFrom(bankAccount);
-
-			std::cout << "Please Select The Currency You Wish To Withdraw\n\n";
-			displayCurrency();
-
-			int amountType;
-			std::cin >> amountType;
-			transaction->setAmountType(amountType);
-
-			std::cout << "Please Type The Amount To Withdraw\n\n";
-
-			float amount;
-			std::cin >> amount;
-
-			transaction->setAmount(amount);
-			transaction->commit(connection);
+			withdrawProcedure(connection, transaction, bankAccount);
 		}
 		else if(op == 3) { // transfer
-			logger->info("Transfer Operation");
-			transaction = TransactionFactory::createTransaction(TransactionType::TRANSFER);
-
-			transaction->setFrom(bankAccount);
-
-			std::cout << "Please Type The Account Number You Wish To Transfer To\n\n";
-
-			int to;
-			std::cin >> to;
-
-			transaction->setTo(to);
-
-
-			std::cout << "Please Select The Currency You Wish To Transfer\n\n";
-			displayCurrency();
-
-			int amountType;
-			std::cin >> amountType;
-			transaction->setAmountType(amountType);
-
-			std::cout << "Please Type The Amount To Transfer\n\n";
-
-			float amount;
-			std::cin >> amount;
-
-			transaction->setAmount(amount);
-
-			transaction->commit(connection);
-
+			transferProcedure(connection, transaction, bankAccount);
 		}
 		else if(op == 4) { //transaction
 			int tranOption;
@@ -178,23 +106,18 @@ int main() {
 				displayAllTransactions(connection, res, row, bankAccount);
 				logger->info("View Transactions");
 			}
-
+			mysql_free_result(res);
 		}
 		else if(op == 5) {
 			isOnMainMenu = false;
 		}
-
-		//mysql_free_result(res);
-
-
 	} while (isOnMainMenu);
 
 	std::cout << "\nExiting...\n";
 	logger->info("Exiting Application..");
+
 	mysql_close(connection);
-
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
 
 	return 0;
 }

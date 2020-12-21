@@ -1,4 +1,6 @@
 #include "ui.h"
+#include "spdlog/spdlog.h"
+#include "spdlog/sinks/rotating_file_sink.h"
 
 void displayOperations() {
 	std::cout << "Please Select an Operation: \n\n";
@@ -10,8 +12,7 @@ void displayOperations() {
 	std::cout << "5. Exit System.\n\n";
 }
 
-void displayCurrency()
-{
+void displayCurrency() {
 	std::cout << "1. ILS\n";
 	std::cout << "2. USD\n";
 	std::cout << "3. JOR\n";
@@ -24,7 +25,93 @@ void displayTransactions() {
 	std::cout << "2. View All Withdraws.\n";
 	std::cout << "3. View All Transfers.\n";
 	std::cout << "4. View All Transactions.\n";
+}
 
+void depositProcedure(MYSQL*& connection, std::unique_ptr<Transaction>& transaction, int bankAccount) {
+	auto logger = spdlog::get("atm-logger");
+	transaction = TransactionFactory::createTransaction(TransactionType::DEPOSIT);
+
+	logger->info("Deposit Operation");
+
+	transaction->setFrom(bankAccount);
+	transaction->setTo(bankAccount);
+
+	std::cout << "Please Select The Currency You Wish To Deposit\n\n";
+	displayCurrency();
+
+	int amountType;
+	std::cin >> amountType;
+
+	transaction->setAmountType(amountType);
+
+	std::cout << "Please Type The Amount to Deposit\n\n";
+
+	float amount;
+	std::cin >> amount;
+
+	transaction->setAmount(amount);
+	transaction->commit(connection);
+
+	std::cout << "Deposit Complete\n\n";
+}
+
+void withdrawProcedure(MYSQL*& connection, std::unique_ptr<Transaction>& transaction, int bankAccount) {
+	auto logger = spdlog::get("atm-logger");
+	transaction = TransactionFactory::createTransaction(TransactionType::WITHDRAW);
+
+	logger->info("Withdraw Operation");
+
+	transaction->setFrom(bankAccount);
+
+	std::cout << "Please Select The Currency You Wish To Withdraw\n\n";
+	displayCurrency();
+
+	int amountType;
+	std::cin >> amountType;
+
+	transaction->setAmountType(amountType);
+
+	std::cout << "Please Type The Amount To Withdraw\n\n";
+
+	float amount;
+	std::cin >> amount;
+
+	transaction->setAmount(amount);
+	transaction->commit(connection);
+
+	std::cout << "Withdraw Complete\n\n";
+}
+
+void transferProcedure(MYSQL *& connection, std::unique_ptr<Transaction>& transaction, int bankAccount) {
+	auto logger = spdlog::get("atm-logger");
+	transaction = TransactionFactory::createTransaction(TransactionType::TRANSFER);
+
+	logger->info("Transfer Operation");
+
+	transaction->setFrom(bankAccount);
+
+	std::cout << "Please Type The Account Number You Wish To Transfer To\n\n";
+
+	int to;
+	std::cin >> to;
+
+	transaction->setTo(to);
+
+	std::cout << "Please Select The Currency You Wish To Transfer\n\n";
+	displayCurrency();
+
+	int amountType;
+	std::cin >> amountType;
+
+	transaction->setAmountType(amountType);
+
+	std::cout << "Please Type The Amount To Transfer\n\n";
+
+	float amount;
+	std::cin >> amount;
+
+	transaction->setAmount(amount);
+	transaction->commit(connection);
 }
 
 void displayAllDeposits(MYSQL*& connection, MYSQL_RES*& res, MYSQL_ROW& row, int bankAccount) {
@@ -68,10 +155,6 @@ void displayAllWithdraws(MYSQL *& connection, MYSQL_RES*& res, MYSQL_ROW & row, 
 		std::cout << "\nNo Withdraws Found.\n\n";
 		return;
 	}
-
-	//std::cout << std::setfill('-') << std::setw(90) << "\n";
-	//std::cout << "|From            |To                |Amount                |Date                        |\n";
-	//std::cout << std::setfill('-') << std::setw(90) << "\n";
 
 	std::cout << std::setfill('-') << std::setw(48) << "\n";
 	std::cout << "|        Amount         |         Date        |\n";

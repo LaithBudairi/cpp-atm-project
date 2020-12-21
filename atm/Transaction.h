@@ -58,7 +58,7 @@ enum TransactionType {
 class TransactionFactory {
 
 public:
-	static std::shared_ptr<Transaction> createTransaction(TransactionType);
+	static std::unique_ptr<Transaction> createTransaction(TransactionType);
 };
 
 #endif
